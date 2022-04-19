@@ -39,7 +39,7 @@
 
 (require 'subr-x)
 (require 'corfu)
-(require 'popon "/home/akib/projects/emacs-popon/popon.el")
+(require 'popon)
 
 (declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
 
