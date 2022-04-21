@@ -40,6 +40,7 @@
 (require 'subr-x)
 (require 'corfu)
 (require 'popon)
+(require 'cl-lib)
 
 (declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
 
@@ -139,62 +140,31 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
            popon-pos))
     nil))
 
-;; NOTE: Just to remove the hardcoded `display-graphic-p' call.
-(defun corfu-popup--auto-post-command ()
-  "Post command hook which initiates auto completion."
-  (when corfu--auto-timer
-    (cancel-timer corfu--auto-timer)
-    (setq corfu--auto-timer nil))
-  (when (and (not completion-in-region-mode)
-             (not defining-kbd-macro)
-             (corfu--match-symbol-p corfu-auto-commands this-command))
-    (setq corfu--auto-timer
-          (run-at-time corfu-auto-delay nil
-                       #'corfu--auto-complete (corfu--auto-tick)))))
+(defun corfu-popup--patch-out-display-graphic-p (fn name)
+  "Patch out `display-graphic-p' in FN and define NAME to that definition."
+  (let* ((vc-follow-symlinks t)
+         (definition (let ((position (find-function-noselect fn)))
+                       (with-current-buffer (car position)
+                         (save-excursion
+                           (goto-char (cdr position))
+                           (read (current-buffer)))))))
+    (setf (nth 1 definition) name)
+    (cl-labels ((patch-out
+                 (form)
+                 (cond
+                  ((equal form '(display-graphic-p))
+                   t)
+                  ((proper-list-p form)
+                   (mapcar #'patch-out form))
+                  (t
+                   form))))
+      (eval (patch-out definition)))))
 
-;; NOTE: Just to remove the hardcoded `display-graphic-p' call.
-(defun corfu-popup--in-region (beg end table &optional pred)
-  "Corfu completion in region function.
-See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
-  (barf-if-buffer-read-only)
-  (when completion-in-region-mode (corfu-quit))
-  (let* ((pt (max 0 (- (point) beg)))
-         (str (buffer-substring-no-properties beg end))
-         (before (substring str 0 pt))
-         (metadata (completion-metadata before table pred))
-         (exit (plist-get completion-extra-properties :exit-function))
-         (threshold (completion--cycle-threshold metadata))
-         (completion-in-region-mode-predicate
-          (or completion-in-region-mode-predicate (lambda () t))))
-    (pcase (completion-try-completion str table pred pt metadata)
-      ('nil (corfu--message "No match") nil)
-      ('t
-       (goto-char end)
-       (corfu--message "Sole match")
-       (when exit (funcall exit str 'finished))
-       t)
-      (`(,newstr . ,newpt)
-       (pcase-let ((`(,base ,candidates ,total . ,_)
-                    (corfu--recompute-candidates str pt table pred)))
-         (setq beg (copy-marker beg)
-               end (copy-marker end t)
-               completion-in-region--data (list beg end table pred))
-         (unless (equal str newstr)
-           (completion--replace beg end (concat newstr)))
-         (goto-char (+ beg newpt))
-         (if (= total 1)
-             (when exit
-               (funcall exit newstr
-                        (if (eq (try-completion (car candidates) table pred) t)
-                            'finished 'exact)))
-           (if (not (and threshold (or (eq threshold t) (>= threshold total))))
-               (corfu--setup)
-             (corfu--cycle-candidates total candidates (+ base beg) end)
-             (unless (equal (completion-boundaries
-                             (buffer-substring-no-properties beg end)
-                             table pred "") '(0 . 0))
-               (corfu--setup)))))
-       t))))
+(eval-and-compile
+  (corfu-popup--patch-out-display-graphic-p
+   'corfu--auto-post-command 'corfu-popup--auto-post-command)
+  (corfu-popup--patch-out-display-graphic-p
+   'corfu--in-region 'corfu-popup--in-region))
 
 (define-minor-mode corfu-popup-mode
   "Corfu popup on terminal."
@@ -208,11 +178,11 @@ See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
                     #'corfu-popup--popup-hide)
         (advice-add #'corfu--auto-post-command :override
                     #'corfu-popup--auto-post-command)
-        (advice-add #'corfu--in-region :override
-                    #'corfu-popup--in-region))
+        (advice-add #'corfu--in-region :override #'corfu-popup--in-region))
     (advice-remove #'corfu--popup-show #'corfu-popup--popup-show)
     (advice-remove #'corfu--popup-hide #'corfu-popup--popup-hide)
-    (advice-remove #'corfu--auto-post-command #'corfu-popup--auto-post-command)
+    (advice-remove #'corfu--auto-post-command
+                   #'corfu-popup--auto-post-command)
     (advice-remove #'corfu--in-region #'corfu-popup--in-region)))
 
 (provide 'corfu-popup)
