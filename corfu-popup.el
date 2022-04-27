@@ -140,31 +140,30 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
            popon-pos))
     nil))
 
-(eval-and-compile
-  (defun corfu-popup--patch-out-display-graphic-p (fn name)
-    "Patch out `display-graphic-p' in FN and define NAME to that \
-definition."
-    (let* ((vc-follow-symlinks t)
-           (definition (let ((position (find-function-noselect fn)))
-                         (with-current-buffer (car position)
-                           (save-excursion
-                             (goto-char (cdr position))
-                             (read (current-buffer)))))))
-      (setf (nth 1 definition) name)
-      (cl-labels ((patch-out
-                   (form)
-                   (cond
-                    ((equal form '(display-graphic-p))
-                     t)
-                    ((proper-list-p form)
-                     (mapcar #'patch-out form))
-                    (t
-                     form))))
-        (eval (patch-out definition)))))
-  (corfu-popup--patch-out-display-graphic-p
-   'corfu--auto-post-command 'corfu-popup--auto-post-command)
-  (corfu-popup--patch-out-display-graphic-p
-   'corfu--in-region 'corfu-popup--in-region))
+(defmacro corfu-popup--patch-out-display-graphic-p (fn name)
+  "Patch out `display-graphic-p' in FN and define NAME to that definition."
+  (let* ((vc-follow-symlinks t)
+         (definition (let ((position (find-function-noselect fn)))
+                       (with-current-buffer (car position)
+                         (save-excursion
+                           (goto-char (cdr position))
+                           (read (current-buffer)))))))
+    (setf (nth 1 definition) name)
+    (cl-labels ((patch-out
+                 (form)
+                 (cond
+                  ((equal form '(display-graphic-p))
+                   t)
+                  ((proper-list-p form)
+                   (mapcar #'patch-out form))
+                  (t
+                   form))))
+      (patch-out definition))))
+
+(corfu-popup--patch-out-display-graphic-p
+ corfu--auto-post-command corfu-popup--auto-post-command)
+(corfu-popup--patch-out-display-graphic-p
+ corfu--in-region corfu-popup--in-region)
 
 (define-minor-mode corfu-popup-mode
   "Corfu popup on terminal."
