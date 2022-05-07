@@ -9,10 +9,10 @@ everywhere.
 | [[./demo-gui.png]] | [[./demo-colorterm.png]] | [[./demo-tty.png]]                 |
 
 /Note: The above screenshots were taken with ~kind-icons~ enabled, which/
-/doesn't work well with overlays.  And the TTY screenshot isn't a/
-/screenshot of a real TTY, it was emulated on a terminal emulator/
-/with ~TERM=linux~ and ~COLORTERM=~, and the Corfu faces were modified to/
-/make the visible on TTY./
+/doesn't work well with overlays on non-graphical displays.  And the TTY/
+/screenshot isn't a screenshot of a real TTY, it was emulated on a terminal/
+/emulator with ~TERM=linux~ and ~COLORTERM=~, and the Corfu faces were/
+/modified to make the visible on TTY./
 
 * Installation
 
