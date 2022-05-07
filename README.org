@@ -12,7 +12,7 @@ everywhere.
 /doesn't work well with overlays on non-graphical displays.  And the TTY/
 /screenshot isn't a screenshot of a real TTY, it was emulated on a terminal/
 /emulator with ~TERM=linux~ and ~COLORTERM=~, and the Corfu faces were/
-/modified to make the visible on TTY./
+/modified to make the popup/popon visible on TTY./
 
 * Installation
 
