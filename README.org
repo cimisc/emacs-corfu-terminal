@@ -1,8 +1,48 @@
 #+title: ~corfu-popup~ - Corfu popup on terminal
 
-Corfu uses child frames to display candidates.  This makes Corfu
-unusable on terminal.  This package replaces that with popup/popon,
-which works everywhere.  Use M-x corfu-popup-mode to enable.  You'll
+Corfu uses child frames to display candidates.  This makes Corfu unusable
+on terminal.  This package replaces that with popup/popon, which works
+everywhere.
+
+| GUI            | Terminal (Colorterm) | TTY (with face customizations) |
+|----------------+----------------------+--------------------------------|
+| [[./demo-gui.png]] | [[./demo-colorterm.png]] | [[./demo-tty.png]]                 |
+
+/Note: The above screenshots were taken with ~kind-icons~ enabled, which/
+/doesn't work well with overlays.  And the TTY screenshot isn't a/
+/screenshot of a real TTY, it was emulated on a terminal emulator/
+/with ~TERM=linux~ and ~COLORTERM=~, and the Corfu faces were modified to/
+/make the visible on TTY./
+
+* Installation
+
+~corfu-popup~ isn't available on any ELPA right now.  To install it, first
+install [[https://codeberg.org/akib/emacs-popon][Popon]] by following installation instructions of it, then do one of
+the following:
+
+** Quelpa
+
+#+begin_src emacs-lisp
+(quelpa '(corfu-popup
+          :fetcher git
+          :url "https://codeberg.org/akib/emacs-corfu-popup.git"))
+#+end_src
+
+** Straight.el
+
+#+begin_src emacs-lisp
+(straight-use-package
+ '(corfu-popup :type git
+               :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
+#+end_src
+
+** Manual
+
+Download the ~corfu-popup.el~ file and put it in your ~load-path~.
+
+* Usage
+
+Enable the global minor mode =M-x corfu-popup-mode= to enable it. You'll
 probably want to enable it only on terminal.  In that case, put the
 following in your init file:
 
