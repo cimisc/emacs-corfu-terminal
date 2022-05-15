@@ -5,7 +5,7 @@
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-04-11
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") corfu popon)
+;; Package-Requires: ((emacs "26.1") (corfu "0.23") (popon "0"))
 ;; Keywords: convenience
 ;; Homepage: https://codeberg.org/akib/emacs-corfu-popup
 
