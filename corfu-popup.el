@@ -42,6 +42,12 @@
 (require 'popon)
 (require 'cl-lib)
 
+(defgroup corfu-popup nil
+  "Corfu popup on terminal."
+  :group 'convenience
+  :link '(url-link "https://codeberg.org/akib/emacs-corfu-popup")
+  :prefix "corfu-popup-")
+
 (declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
 
 (defvar corfu-popup--popon nil
@@ -168,8 +174,8 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
 ;;;###autoload
 (define-minor-mode corfu-popup-mode
   "Corfu popup on terminal."
-  nil nil nil
   :global t
+  :group 'corfu-popup
   (if corfu-popup-mode
       (progn
         (advice-add #'corfu--popup-show :override
