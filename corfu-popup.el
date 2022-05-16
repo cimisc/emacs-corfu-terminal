@@ -114,8 +114,8 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                         (cons (max 0 (- (car pos) off))
                               (if (and (< (floor (window-screen-lines))
                                           (+ (cdr pos) (length lines)))
-                                       (>= (cdr pos) 8))
-                                  (- (cdr pos) 8)
+                                       (>= (cdr pos) (length lines)))
+                                  (- (cdr pos) (length lines))
                                 (1+ (cdr pos))))))))
     (setq corfu-popup--last-position
           (list popon-pos pos (window-start) (buffer-modified-tick)))
