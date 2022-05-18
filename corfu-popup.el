@@ -48,6 +48,18 @@
   :link '(url-link "https://codeberg.org/akib/emacs-corfu-popup")
   :prefix "corfu-popup-")
 
+(defcustom corfu-popup-position-right-margin 0
+  "Number of columns of margin at the right of window.
+
+Always keep the popup this many columns away from the right edge of the
+window.
+
+Note: If the popup breaks or crosses the right edge of window, you may set
+this variable to warkaround it.  But remember, that's a *bug*, so if that
+ever happens to you please report the issue at
+https://codeberg.org/akib/emacs-corfu-popup/issues."
+  :type 'integer)
+
 (declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
 
 (defvar corfu-popup--popon nil
@@ -112,7 +124,7 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                                              (frame-char-width))))
                         (+ width margin-left-width margin-right-width)))
          (popon-pos (if (equal (cdr corfu-popup--last-position)
-                               (list pos (window-start)
+                               (list pos popon-width (window-start)
                                      (buffer-modified-tick)))
                         (car corfu-popup--last-position)
                       (let ((pos (popon-x-y-at-pos pos)))
@@ -123,9 +135,14 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                                   (line-number-display-width)
                                   (if (display-graphic-p)
                                       (let ((fringes (window-fringes)))
-                                        (/ (+ (car fringes) (cadr fringes))
-                                           (frame-char-width)))
+                                        (+ (/ (+ (car fringes)
+                                                 (cadr fringes))
+                                              (frame-char-width))
+                                           (if (zerop (cadr fringes))
+                                               1
+                                             0)))
                                     (1+ (if (zerop (window-hscroll)) 0 1)))
+                                  corfu-popup-position-right-margin
                                   popon-width))
                           0)
                          (if (and (< (floor (window-screen-lines))
@@ -134,7 +151,8 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                              (- (cdr pos) (length lines))
                            (1+ (cdr pos))))))))
     (setq corfu-popup--last-position
-          (list popon-pos pos (window-start) (buffer-modified-tick)))
+          (list popon-pos pos popon-width (window-start)
+                (buffer-modified-tick)))
     (setq corfu-popup--popon
           (popon-create
            (cons
