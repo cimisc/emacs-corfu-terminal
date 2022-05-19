@@ -1,4 +1,4 @@
-;;; corfu-terminal.el --- Corfu popup on terminal -*- lexical-binding: t -*-
+;;; corfu-terminal.el --- Corfu popup on terminal -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 Akib Azmain Turja.
 
