@@ -1,4 +1,4 @@
-;;; corfu-popup.el --- Corfu popup on terminal -*- lexical-binding: t -*-
+;;; corfu-terminal.el --- Corfu popup on terminal -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022 Akib Azmain Turja.
 
@@ -7,7 +7,7 @@
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "26.1") (corfu "0.23") (popon "0"))
 ;; Keywords: convenience
-;; Homepage: https://codeberg.org/akib/emacs-corfu-popup
+;; Homepage: https://codeberg.org/akib/emacs-corfu-terminal
 
 ;; This file is not part of GNU Emacs.
 
@@ -28,12 +28,12 @@
 
 ;; Corfu uses child frames to display candidates.  This makes Corfu
 ;; unusable on terminal.  This package replaces that with popup/popon,
-;; which works everywhere.  Use M-x corfu-popup-mode to enable.  You'll
+;; which works everywhere.  Use M-x corfu-terminal-mode to enable.  You'll
 ;; probably want to enable it only on terminal.  In that case, put the
 ;; following in your init file:
 
 ;;   (unless (display-graphic-p)
-;;     (corfu-popup-mode +1))
+;;     (corfu-terminal-mode +1))
 
 ;;; Code:
 
@@ -42,13 +42,13 @@
 (require 'popon)
 (require 'cl-lib)
 
-(defgroup corfu-popup nil
+(defgroup corfu-terminal nil
   "Corfu popup on terminal."
   :group 'convenience
-  :link '(url-link "https://codeberg.org/akib/emacs-corfu-popup")
-  :prefix "corfu-popup-")
+  :link '(url-link "https://codeberg.org/akib/emacs-corfu-terminal")
+  :prefix "corfu-terminal-")
 
-(defcustom corfu-popup-position-right-margin 0
+(defcustom corfu-terminal-position-right-margin 0
   "Number of columns of margin at the right of window.
 
 Always keep the popup this many columns away from the right edge of the
@@ -57,28 +57,29 @@ window.
 Note: If the popup breaks or crosses the right edge of window, you may set
 this variable to warkaround it.  But remember, that's a *bug*, so if that
 ever happens to you please report the issue at
-https://codeberg.org/akib/emacs-corfu-popup/issues."
+https://codeberg.org/akib/emacs-corfu-terminal/issues."
   :type 'integer)
 
 (declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
 
-(defvar corfu-popup--popon nil
+(defvar corfu-terminal--popon nil
   "Popon object.")
 
-(defvar corfu-popup--last-position nil
+(defvar corfu-terminal--last-position nil
   "Position of last popon, and some data is to make sure that's valid.")
 
-(defun corfu-popup--popup-hide ()
+(defun corfu-terminal--popup-hide ()
   "Hide popup."
-  (when corfu-popup--popon
-    (setq corfu-popup--popon (popon-kill corfu-popup--popon))))
+  (when corfu-terminal--popon
+    (setq corfu-terminal--popon (popon-kill corfu-terminal--popon))))
 
-(defun corfu-popup--popup-show (pos off width lines &optional curr lo bar)
+(defun corfu-terminal--popup-show (pos off width lines &optional curr lo
+                                       bar)
   "Show popup at OFF columns before POS.
 
 Show LINES, a list of lines.  Highlight CURRth line as current selection.
 Show a vertical scroll bar of size BAR + 1 from LOth line."
-  (corfu-popup--popup-hide)  ; Hide the popup first.
+  (corfu-terminal--popup-hide)  ; Hide the popup first.
   (let* ((bar-width (if (display-graphic-p)
                         (ceiling (* (default-font-width) corfu-bar-width))
                       (ceiling corfu-bar-width)))
@@ -123,10 +124,10 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                                                 margin-right-width)
                                              (frame-char-width))))
                         (+ width margin-left-width margin-right-width)))
-         (popon-pos (if (equal (cdr corfu-popup--last-position)
+         (popon-pos (if (equal (cdr corfu-terminal--last-position)
                                (list pos popon-width (window-start)
                                      (buffer-modified-tick)))
-                        (car corfu-popup--last-position)
+                        (car corfu-terminal--last-position)
                       (let ((pos (popon-x-y-at-pos pos)))
                         (cons
                          (max
@@ -142,7 +143,7 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                                                1
                                              0)))
                                     (1+ (if (zerop (window-hscroll)) 0 1)))
-                                  corfu-popup-position-right-margin
+                                  corfu-terminal-position-right-margin
                                   popon-width))
                           0)
                          (if (and (< (floor (window-screen-lines))
@@ -150,10 +151,10 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                                   (>= (cdr pos) (length lines)))
                              (- (cdr pos) (length lines))
                            (1+ (cdr pos))))))))
-    (setq corfu-popup--last-position
+    (setq corfu-terminal--last-position
           (list popon-pos pos popon-width (window-start)
                 (buffer-modified-tick)))
-    (setq corfu-popup--popon
+    (setq corfu-terminal--popon
           (popon-create
            (cons
             (string-join
@@ -177,7 +178,7 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
            popon-pos))
     nil))
 
-(defmacro corfu-popup--patch-out-display-graphic-p (fn name)
+(defmacro corfu-terminal--patch-out-display-graphic-p (fn name)
   "Patch out `display-graphic-p' in FN and define NAME to that definition."
   (let* ((vc-follow-symlinks t)
          (definition (let ((position (find-function-noselect fn)))
@@ -197,30 +198,31 @@ Show a vertical scroll bar of size BAR + 1 from LOth line."
                    form))))
       (patch-out definition))))
 
-(corfu-popup--patch-out-display-graphic-p
- corfu--auto-post-command corfu-popup--auto-post-command)
-(corfu-popup--patch-out-display-graphic-p
- corfu--in-region corfu-popup--in-region)
+(corfu-terminal--patch-out-display-graphic-p
+ corfu--auto-post-command corfu-terminal--auto-post-command)
+(corfu-terminal--patch-out-display-graphic-p
+ corfu--in-region corfu-terminal--in-region)
 
 ;;;###autoload
-(define-minor-mode corfu-popup-mode
+(define-minor-mode corfu-terminal-mode
   "Corfu popup on terminal."
   :global t
-  :group 'corfu-popup
-  (if corfu-popup-mode
+  :group 'corfu-terminal
+  (if corfu-terminal-mode
       (progn
         (advice-add #'corfu--popup-show :override
-                    #'corfu-popup--popup-show)
+                    #'corfu-terminal--popup-show)
         (advice-add #'corfu--popup-hide :override
-                    #'corfu-popup--popup-hide)
+                    #'corfu-terminal--popup-hide)
         (advice-add #'corfu--auto-post-command :override
-                    #'corfu-popup--auto-post-command)
-        (advice-add #'corfu--in-region :override #'corfu-popup--in-region))
-    (advice-remove #'corfu--popup-show #'corfu-popup--popup-show)
-    (advice-remove #'corfu--popup-hide #'corfu-popup--popup-hide)
+                    #'corfu-terminal--auto-post-command)
+        (advice-add #'corfu--in-region :override
+                    #'corfu-terminal--in-region))
+    (advice-remove #'corfu--popup-show #'corfu-terminal--popup-show)
+    (advice-remove #'corfu--popup-hide #'corfu-terminal--popup-hide)
     (advice-remove #'corfu--auto-post-command
-                   #'corfu-popup--auto-post-command)
-    (advice-remove #'corfu--in-region #'corfu-popup--in-region)))
+                   #'corfu-terminal--auto-post-command)
+    (advice-remove #'corfu--in-region #'corfu-terminal--in-region)))
 
-(provide 'corfu-popup)
-;;; corfu-popup.el ends here
+(provide 'corfu-terminal)
+;;; corfu-terminal.el ends here

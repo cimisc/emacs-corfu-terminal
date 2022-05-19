@@ -1,4 +1,4 @@
-#+title: ~corfu-popup~ - Corfu popup on terminal
+#+title: ~corfu-terminal~ - Corfu popup on terminal
 
 Corfu uses child frames to display candidates.  This makes Corfu unusable
 on terminal.  This package replaces that with popup/popon, which works
@@ -15,37 +15,38 @@ everywhere.
 
 * Installation
 
-~corfu-popup~ isn't available on any ELPA right now.  To install it, first
-install [[https://codeberg.org/akib/emacs-popon][Popon]] by following installation instructions in it's README, then
-do one of the following:
+~corfu-terminal~ isn't available on any ELPA right now.  To install it,
+first install [[https://codeberg.org/akib/emacs-popon][Popon]] by following installation instructions in it's README,
+then do one of the following:
 
 ** Quelpa
 
 #+begin_src emacs-lisp
-(quelpa '(corfu-popup
+(quelpa '(corfu-terminal
           :fetcher git
-          :url "https://codeberg.org/akib/emacs-corfu-popup.git"))
+          :url "https://codeberg.org/akib/emacs-corfu-terminal.git"))
 #+end_src
 
 ** Straight.el
 
 #+begin_src emacs-lisp
 (straight-use-package
- '(corfu-popup :type git
-               :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
+ '(corfu-terminal
+   :type git
+   :repo "https://codeberg.org/akib/emacs-corfu-terminal.git"))
 #+end_src
 
 ** Manual
 
-Download the ~corfu-popup.el~ file and put it in your ~load-path~.
+Download the ~corfu-terminal.el~ file and put it in your ~load-path~.
 
 * Usage
 
-Enable the global minor mode =M-x corfu-popup-mode= to enable it. You'll
+Enable the global minor mode =M-x corfu-terminal-mode= to enable it. You'll
 probably want to enable it only on terminal.  In that case, put the
 following in your init file:
 
 #+begin_src emacs-lisp
 (unless (display-graphic-p)
-  (corfu-popup-mode +1))
+  (corfu-terminal-mode +1))
 #+end_src
