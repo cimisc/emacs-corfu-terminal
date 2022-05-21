@@ -43,6 +43,7 @@
 (define-obsolete-variable-alias 'corfu-popup-position-right-margin
   'corfu-terminal-position-right-margin "0.1")
 
+;;;###autoload
 (define-obsolete-function-alias 'corfu-popup-mode 'corfu-terminal-mode
   "0.1")
 
