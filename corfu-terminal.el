@@ -205,26 +205,6 @@ definition in Corfu."
 Same as `always' function of Emacs 28."
   t)
 
-(defmacro corfu-terminal--patch-out-display-graphic-p (fn name)
-  "Patch out `display-graphic-p' in FN and define NAME to that definition."
-  (let* ((vc-follow-symlinks t)
-         (definition (let ((position (find-function-noselect fn)))
-                       (with-current-buffer (car position)
-                         (save-excursion
-                           (goto-char (cdr position))
-                           (read (current-buffer)))))))
-    (setf (nth 1 definition) name)
-    (cl-labels ((patch-out
-                 (form)
-                 (cond
-                  ((equal form '(display-graphic-p))
-                   t)
-                  ((proper-list-p form)
-                   (mapcar #'patch-out form))
-                  (t
-                   form))))
-      (patch-out definition))))
-
 ;;;###autoload
 (define-minor-mode corfu-terminal-mode
   "Corfu popup on terminal."
