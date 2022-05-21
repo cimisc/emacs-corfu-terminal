@@ -5,7 +5,7 @@
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-04-11
 ;; Version: 0.1
-;; Package-Requires: ((emacs "26.1") (corfu "0.23") (popon "0"))
+;; Package-Requires: ((emacs "26.1") (corfu "0.24") (popon "0"))
 ;; Keywords: convenience
 ;; Homepage: https://codeberg.org/akib/emacs-corfu-terminal
 
@@ -199,6 +199,12 @@ definition in Corfu."
              popon-pos))
       nil)))
 
+(defun corfu-terminal--popup-support-p ()
+  "Do nothing and return t.
+
+Same as `always' function of Emacs 28."
+  t)
+
 (defmacro corfu-terminal--patch-out-display-graphic-p (fn name)
   "Patch out `display-graphic-p' in FN and define NAME to that definition."
   (let* ((vc-follow-symlinks t)
@@ -219,11 +225,6 @@ definition in Corfu."
                    form))))
       (patch-out definition))))
 
-(corfu-terminal--patch-out-display-graphic-p
- corfu--auto-post-command corfu-terminal--auto-post-command)
-(corfu-terminal--patch-out-display-graphic-p
- corfu--in-region corfu-terminal--in-region)
-
 ;;;###autoload
 (define-minor-mode corfu-terminal-mode
   "Corfu popup on terminal."
@@ -235,15 +236,13 @@ definition in Corfu."
                     #'corfu-terminal--popup-show)
         (advice-add #'corfu--popup-hide :around
                     #'corfu-terminal--popup-hide)
-        (advice-add #'corfu--auto-post-command :override
-                    #'corfu-terminal--auto-post-command)
-        (advice-add #'corfu--in-region :override
-                    #'corfu-terminal--in-region))
+        (advice-add #'corfu--popup-support-p :override
+                    #'corfu-terminal--popup-support-p))
     (advice-remove #'corfu--popup-show #'corfu-terminal--popup-show)
     (advice-remove #'corfu--popup-hide #'corfu-terminal--popup-hide)
-    (advice-remove #'corfu--auto-post-command
-                   #'corfu-terminal--auto-post-command)
-    (advice-remove #'corfu--in-region #'corfu-terminal--in-region)))
+    (advice-remove #'corfu--popup-support-p
+                   #'corfu-terminal--popup-support-p)))
+
 
 (provide 'corfu-terminal)
 ;;; corfu-terminal.el ends here
