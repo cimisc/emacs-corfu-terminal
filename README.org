@@ -15,9 +15,9 @@ everywhere.
 
 * Installation
 
-~corfu-terminal~ isn't available on any ELPA right now.  To install it,
-first install [[https://codeberg.org/akib/emacs-popon][Popon]] by following installation instructions in it's README,
-then do one of the following:
+** Package
+
+Install from NonGNU ELPA.
 
 ** Quelpa
 
