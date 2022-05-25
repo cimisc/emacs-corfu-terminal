@@ -4,8 +4,8 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-04-11
-;; Version: 0.1
-;; Package-Requires: ((emacs "26.1") (corfu "0.24") (popon "0"))
+;; Version: 0.2
+;; Package-Requires: ((emacs "26.1") (corfu "0.24") (popon "0.1"))
 ;; Keywords: convenience
 ;; Homepage: https://codeberg.org/akib/emacs-corfu-terminal
 
@@ -151,6 +151,8 @@ definition in Corfu."
                           (car corfu-terminal--last-position)
                         (let ((pos (popon-x-y-at-pos pos)))
                           (cons
+                           ;; NOTE: `window-max-chars-per-line' is probably
+                           ;; better.
                            (max
                             (min (- (car pos) off)
                                  (- (window-width)
