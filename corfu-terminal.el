@@ -99,19 +99,13 @@ definition in Corfu."
            (display-graphic-p))
       (funcall fn pos off width lines curr lo bar)
     (corfu-terminal--popup-hide #'ignore)  ; Hide the popup first.
-    (let* ((bar-width (if (display-graphic-p)
-                          (ceiling (* (default-font-width)
-                                      corfu-bar-width))
-                        (ceiling corfu-bar-width)))
-           (margin-left-width (if (display-graphic-p)
-                                  (ceiling (* (default-font-width)
-                                              corfu-left-margin-width))
-                                (ceiling corfu-left-margin-width)))
-           (margin-right-width (max (if (display-graphic-p)
-                                        (ceiling
-                                         (* (default-font-width)
-                                            corfu-right-margin-width))
-                                      (ceiling corfu-right-margin-width))
+    (let* ((bar-width (ceiling (* (default-font-width)
+                                  corfu-bar-width)))
+           (margin-left-width (ceiling (* (default-font-width)
+                                          corfu-left-margin-width)))
+           (margin-right-width (max (ceiling
+                                     (* (default-font-width)
+                                        corfu-right-margin-width))
                                     bar-width))
            (scroll-bar (when (< 0 bar-width)
                          (if (display-graphic-p)
@@ -151,21 +145,9 @@ definition in Corfu."
                           (car corfu-terminal--last-position)
                         (let ((pos (popon-x-y-at-pos pos)))
                           (cons
-                           ;; NOTE: `window-max-chars-per-line' is probably
-                           ;; better.
                            (max
-                            (min (- (car pos) off)
-                                 (- (window-width)
-                                    (line-number-display-width)
-                                    (if (display-graphic-p)
-                                        (let ((fringes (window-fringes)))
-                                          (+ (/ (+ (car fringes)
-                                                   (cadr fringes))
-                                                (frame-char-width))
-                                             (if (zerop (cadr fringes))
-                                                 1
-                                               0)))
-                                      (1+ (if (zerop (window-hscroll)) 0 1)))
+                            (min (- (car pos) (+ off margin-left-width))
+                                 (- (window-max-chars-per-line)
                                     corfu-terminal-position-right-margin
                                     popon-width))
                             0)
