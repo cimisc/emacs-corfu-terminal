@@ -151,8 +151,8 @@ definition in Corfu."
                                     corfu-terminal-position-right-margin
                                     popon-width))
                             0)
-                           (if (and (< (floor (window-screen-lines))
-                                       (+ (cdr pos) (length lines)))
+                           (if (and (< (window-body-height)
+                                       (+ (1+ (cdr pos)) (length lines)))
                                     (>= (cdr pos) (length lines)))
                                (- (cdr pos) (length lines))
                              (1+ (cdr pos))))))))
