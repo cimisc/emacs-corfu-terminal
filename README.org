@@ -50,3 +50,11 @@ following in your init file:
 (unless (display-graphic-p)
   (corfu-terminal-mode +1))
 #+end_src
+
+* Complementary Packages
+
+- [[https://github.com/jdtsmith/kind-icon][~kind-icon~]]: ~kind-icon~ adds an icon in front of each candidate
+  describing the kind of the candidate.
+- [[https://github.com/galeo/corfu-doc][~corfu-doc~]] and [[https://codeberg.org/akib/emacs-corfu-doc-terminal][~corfu-doc-terminal~]]: ~corfu-doc~ show a documentation
+  popup for the current candidate.  ~corfu-doc-terminal~ provides a Popon
+  (overlay) based display, so that you can use it on terminal.
