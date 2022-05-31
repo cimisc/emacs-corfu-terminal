@@ -48,6 +48,14 @@
   :link '(url-link "https://codeberg.org/akib/emacs-corfu-terminal")
   :prefix "corfu-terminal-")
 
+(defcustom corfu-terminal-enable-on-minibuffer t
+  "Non-nil means enable corfu-terminal on minibuffer."
+  :type 'boolean)
+
+(defcustom corfu-terminal-resize-minibuffer t
+  "Non-nil means resize minibuffer to show popup."
+  :type 'boolean)
+
 (defcustom corfu-terminal-position-right-margin 0
   "Number of columns of margin at the right of window.
 
@@ -65,13 +73,18 @@ https://codeberg.org/akib/emacs-corfu-terminal/issues."
   :type '(choice (const :tag "Yes" t)
                  (const :tag "No" nil)))
 
-(declare-function corfu--auto-tick "corfu") ;; OK, byte-compiler?
-
 (defvar corfu-terminal--popon nil
   "Popon object.")
 
 (defvar corfu-terminal--last-position nil
   "Position of last popon, and some data is to make sure that's valid.")
+
+(defun corfu-terminal--popup-support-p ()
+  "Return whether corfu-terminal supports showing popon now."
+  (or (not (minibufferp))
+      corfu-terminal-enable-on-minibuffer
+      (and corfu-terminal-disable-on-gui
+           (display-graphic-p))))
 
 (defun corfu-terminal--popup-hide (fn)
   "Hide popup.
@@ -99,6 +112,11 @@ definition in Corfu."
            (display-graphic-p))
       (funcall fn pos off width lines curr lo bar)
     (corfu-terminal--popup-hide #'ignore)  ; Hide the popup first.
+    (when (and (window-minibuffer-p)
+               (< (window-body-height) (1+ (length lines)))
+               corfu-terminal-resize-minibuffer
+               (not (frame-root-window-p (selected-window))))
+      (window-resize nil (- (1+ (length lines)) (window-body-height))))
     (let* ((bar-width (ceiling (* (default-font-width)
                                   corfu-bar-width)))
            (margin-left-width (ceiling (* (default-font-width)
@@ -182,12 +200,6 @@ definition in Corfu."
               popon-width)
              popon-pos))
       nil)))
-
-(defun corfu-terminal--popup-support-p ()
-  "Do nothing and return t.
-
-Same as `always' function of Emacs 28."
-  t)
 
 ;;;###autoload
 (define-minor-mode corfu-terminal-mode
