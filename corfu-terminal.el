@@ -114,11 +114,14 @@ definition in Corfu."
       (funcall fn pos off width lines curr lo bar)
     (corfu-terminal--popup-hide #'ignore)  ; Hide the popup first.
     (when (and (window-minibuffer-p)
-               (< (window-body-height) (1+ (length lines)))
+               (< (/ (window-body-height nil 'pixelwise)
+                     (default-font-height))
+                  (1+ (length lines)))
                corfu-terminal-resize-minibuffer
                (not (frame-root-window-p (selected-window))))
       (window-resize nil (- (1+ (length lines))
-                            (window-body-height))))
+                            (/ (window-body-height nil 'pixelwise)
+                               (default-font-height)))))
     (let* ((bar-width (ceiling (* (default-font-width)
                                   corfu-bar-width)))
            (margin-left-width (ceiling (* (default-font-width)
@@ -139,27 +142,26 @@ definition in Corfu."
                                `(space :width (,bar-width))
                                'face 'corfu-bar))
                 (concat
-                 (make-string (- margin-right-width bar-width)
-                              ? )
-                 (propertize (make-string bar-width ? ) 'face
+                 (make-string (- margin-right-width bar-width) ?\ )
+                 (propertize (make-string bar-width ?\ ) 'face
                              'corfu-bar)))))
            (margin-left
             (when (> margin-left-width 0)
               (if (display-graphic-p)
                   (propertize
                    " " 'display `(space :width (,margin-left-width)))
-                (make-string margin-left-width ? ))))
+                (make-string margin-left-width ?\ ))))
            (margin-right
             (when (> margin-right-width 0)
               (if (display-graphic-p)
                   (propertize
                    " " 'display `(space :width (,margin-right-width)))
-                (make-string margin-right-width ? ))))
+                (make-string margin-right-width ?\ ))))
            (popon-width
             (if (display-graphic-p)
                 (+ width (round (/ (+ margin-left-width
                                       margin-right-width)
-                                   (frame-char-width))))
+                                   (default-font-width))))
               (+ width margin-left-width margin-right-width)))
            (popon-pos
             (if (equal (cdr corfu-terminal--last-position)
@@ -174,7 +176,8 @@ definition in Corfu."
                           corfu-terminal-position-right-margin
                           popon-width))
                   0)
-                 (if (and (< (window-body-height)
+                 (if (and (< (/ (window-body-height nil 'pixelwise)
+                                (default-font-height))
                              (+ (1+ (cdr pos)) (length lines)))
                           (>= (cdr pos) (length lines)))
                      (- (cdr pos) (length lines))
