@@ -79,14 +79,16 @@ https://codeberg.org/akib/emacs-corfu-terminal/issues."
 (defvar corfu-terminal--last-position nil
   "Position of last popon, and some data to make sure that's valid.")
 
-(defun corfu-terminal--popup-support-p ()
+(cl-defmethod corfu--popup-support-p (&context (corfu-terminal-mode
+                                                (eql t)))
   "Return whether corfu-terminal supports showing popon now."
   (or (not (minibufferp))
       corfu-terminal-enable-on-minibuffer
       (and corfu-terminal-disable-on-gui
            (display-graphic-p))))
 
-(defun corfu-terminal--popup-hide (fn)
+(cl-defmethod corfu--popup-hide (&context (corfu-terminal-mode
+                                           (eql t)))
   "Hide popup.
 
 If `corfu-terminal-disable-on-gui' is non-nil and  `display-graphic-p'
@@ -94,13 +96,15 @@ returns non-nil then call FN instead, where FN should be the original
 definition in Corfu."
   (if (and corfu-terminal-disable-on-gui
            (display-graphic-p))
-      (funcall fn)
+      (cl-call-next-method)
     (when corfu-terminal--popon
       (setq corfu-terminal--popon
             (popon-kill corfu-terminal--popon)))))
 
-(defun corfu-terminal--popup-show ( fn pos off width lines &optional
-                                    curr lo bar)
+(cl-defmethod corfu--popup-show ( pos off width lines
+                                  &context (corfu-terminal-mode
+                                            (eql t))
+                                  &optional curr lo bar)
   "Show popup at OFF columns before POS.
 
 Show LINES, a list of lines.  Highlight CURRth line as current
@@ -111,8 +115,8 @@ returns non-nil then call FN instead, where FN should be the original
 definition in Corfu."
   (if (and corfu-terminal-disable-on-gui
            (display-graphic-p))
-      (funcall fn pos off width lines curr lo bar)
-    (corfu-terminal--popup-hide #'ignore)  ; Hide the popup first.
+      (cl-call-next-method)
+    (corfu--popup-hide) ; Hide the popup first.
     (when (and (window-minibuffer-p)
                (< (/ (window-body-height nil 'pixelwise)
                      (default-font-height))
@@ -215,19 +219,7 @@ definition in Corfu."
 (define-minor-mode corfu-terminal-mode
   "Corfu popup on terminal."
   :global t
-  :group 'corfu-terminal
-  (if corfu-terminal-mode
-      (progn
-        (advice-add #'corfu--popup-show :around
-                    #'corfu-terminal--popup-show)
-        (advice-add #'corfu--popup-hide :around
-                    #'corfu-terminal--popup-hide)
-        (advice-add #'corfu--popup-support-p :override
-                    #'corfu-terminal--popup-support-p))
-    (advice-remove #'corfu--popup-show #'corfu-terminal--popup-show)
-    (advice-remove #'corfu--popup-hide #'corfu-terminal--popup-hide)
-    (advice-remove #'corfu--popup-support-p
-                   #'corfu-terminal--popup-support-p)))
+  :group 'corfu-terminal)
 
 (provide 'corfu-terminal)
 ;;; corfu-terminal.el ends here
